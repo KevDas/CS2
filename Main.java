@@ -1,159 +1,200 @@
-/* COP 3503C Assignment 1
- * This program is written by: Kevin Dasrath
- */
-
+/* COP 3503C Assignment 2
+This program is written by: Kevin Dasrath */
 
 import java.util.Scanner;
-import java.util.HashSet;
+import java.util.*;
+import java.io.*;
+import java.util.Arrays;
 
 
 public class Main {
 
-    static Scanner scan;
-    public static int MAX = 20;
-
-    public static int[] getCandidatePair(int A[], int target){
-            
-
-            int n1 = 2;
-            int n2 = target - 1;
-            int pair[] = {-1 , -1};
-            while (n1 < n2){
-
-                int res = A[n1] + A[n2];
-
-
     
-
-                if (res == A[target]){
-                    pair[0] = A[n1];
-                    pair[1] = A[n2];
-                    return pair;
-                }
-                else if (res > A[target])
-                    n2--;
-                else if (res < A[target])
-                    n1++;
-                    
-
-            }
-            return pair;
-    }
-   
-
-    public static int[] unsortedGetCandidatePair(int A[], int target){
-
-        HashSet<Integer> values = new HashSet<Integer>();
-            int n = A[1];
-            int[] pair = {-1, -1};
-
-            for (int i = 2; i < 2 + n; ++i){
-            
-                if (values.contains(A[target] - A[i])){
-                    pair[0] = A[target] - A[i];
-                    pair[1] = A[i];
-                }
-                else values.add(A[i]);
-            }
-            
-
-        return pair;
+    static Scanner scan = new Scanner(System.in);
+    static int M, N, S;
+    static char[][] array;
+    static String[] words;
+    static char[][] charWords;
+ 
 
 
+
+
+    void printSolution(char sol[][])
+    {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++)
+                System.out.print(sol[i][j] + ", ");
+            System.out.println();
+        }
     }
 
-    public static void main(String[] args){
+
+
+            boolean isSafe(int x, int y)
+            {
+              if (x >= 0 && x < M && y >= 0 && y < N)
+                return true;
+              
+              return false;
+            }
+
+    boolean getSolution(char[] word)
+    {
+        char sol[][] = new char[M][N];
+        
+        for (int i = 0; i < M; ++i)
+        {
+            for (int j = 0; j < N; ++j) 
+            {
+                sol[i][j] = '_';
+            }
+        }
+        boolean isPath = false;
+        while (isPath == false){
+            for (int i = 0; i < M; ++i){
+                for (int j = 0; j < N; ++j){
+                    isPath = findPath(sol, i, j, word, 0);
+                }
+            }
+            System.out.print("Solution doesn't exist");
+            return false;
+        
+
+        }
+         
+        printSolution(sol);
+        return true;
+
+    }
+    boolean findPath(char[][] sol, int x, int y, char[] word, int idx)
+    {
+        if (x == N - 1 && y == N - 1 && array[x][y] == word[idx]) {
+            sol[x][y] = array[x][y];
+            return true;
+        } 
+         // Check if it is safe to go to maze[x][y]
+        if (isSafe(x, y) == true) {
+
+            if (findPath(sol, x-1, y-1, word, idx++)) return true;
+            if (findPath(sol, x-1, y, word, idx++)) return true;
+            if (findPath(sol, x-1, y+1, word, idx++)) return true;
+            if (findPath(sol, x, y+1, word, idx++)) return true;
+            if (findPath(sol, x+1, y+1, word, idx++)) return true;
+            if (findPath(sol, x+1, y, word, idx++)) return true;
+            if (findPath(sol, x+1, y-1, word, idx++)) return true;
+            if (findPath(sol, x, y-1, word, idx++)) return true;
+            
+                      
+            /* If none of the above movements works then
+            BACKTRACK: unmark x, y as part of solution
+            path */
+            sol[x][y] = '_';
+            return false;
+        } 
+        return false;
+    }
+
+
+
+
+    void fillArray(){
+        for (int i = 0; i < M; ++i)
+        {
+            for (int j = 0; j < N; ++j)
+                array[i][j] = scan.next().charAt(0);
+        }
+    } 
+
+    void getWords(){
+        
+        for (int i = 0; i < S; ++i){
+            words[i] = scan.next();
+            charWords[i] = words[i].toCharArray();
+        }
+    }
+
+    public static void main(String[] args) {
+        
+        Main matrix = new Main();
+
+        M = scan.nextInt();
+        N = scan.nextInt();
+        S = scan.nextInt();
+
 
         
-        scan = new Scanner(System.in);
-        // n represents the number of test cases to be processed
-        int n = scan.nextInt();
+        matrix.fillArray(0);
+        matrix.getWords();
 
-        // creates an array that contains n sub-arrays of size 20;
-        int[][] array = new int[n][MAX];
-        // array of target values
-        int[] target = new int[n];
-
-        // pair array (array of size 2, where pair[0] is the first 
-        // element and pair[1] is the second element)
-        int[] pair = new int[1];
-
-        int j;
-
-
-        for (int i = 0; i < n; i++){
-            array[i][0] = scan.nextInt();
-            array[i][1] = scan.nextInt();
-            for (j = 2; j < 2 + array[i][1]; ++j){
-                array[i][j] = scan.nextInt();
-            }
-            
-            array[i][j] = scan.nextInt();
-            target[i] = j;
-        }
-
-        for (int i = 0; i < n; i++){
-
-            if (array[i][0] == 1){
-                pair = getCandidatePair(array[i], target[i]);
-                if (pair[0] == -1 && pair[1] == -1){
-                    System.out.println("Test case #" + (i+1) + ": No way you can spend exactly " + array[i][target[i]] + "points.");
-                }
-                else {
-                    System.out.println("Test case #" + (i+1) + ": Spend " + array[i][target[i]] + " points by playing games with " + pair[0] + " points and " + pair[1] + " points.");
-                }
-            }
-            else if (array[i][0] == 0){
-                pair = unsortedGetCandidatePair(array[i], target[i]);
-                if (pair[0] == -1 && pair[1] == -1){
-                    System.out.println("Test case #" + (i+1) + ": No way you can spend exactly " + array[i][target[i]] + " points.");
-                }
-                else {
-                    System.out.println("Test case #" + (i+1) + ": Spend " + array[i][target[i]] + " points by playing games with " + pair[0] + " points and " + pair[1] + " points.");
-                }
-
-            }
-            else {
-                System.out.println("Invalid Entry");
-                return;
-            }
-        }
-
-        /*for (int i = 0; i < n; ++i){
-
-            int sort = scan.nextInt();
-            int size = scan.nextInt();
-
-            int array[][];
-            int pair[];
-            pair = new int[1];
-            array = new int[n][3 + size];
-            array[0] = sort;
-            array[1] = size;
-            int j;
-            for (j = 2; j < size; ++j){
-                array[i][j] = scan.nextInt();
-            }
-
-            if (sort == 1)
-                 pair = getCandidatePair(array, array[j]);
-            
-               
+        for (int i = 0; i < S; ++i)
+            matrix.getSolution(charWords[S]);
+       
+    
+       
+        
 
         }
-        */
-
     }
 
-}
 
 
 
-// check for amount of arrays to create
-    // create the first array, with:
-        //its first value being if its sorted
-        // its second value being the amount of elements contained (n)
-        // its 3rd through n elements being the values to check through
-        // its n + 1th value being the target value
+
+    /*  (for int i = 0; i < S; ++i){
+        int array[S][][] = checkForWordFunc(array[M][N], word S, int i, strlen);
+    }*/
+
+    /*int** checkForWordFunc(double array, string S){
+     
+        //for any letter, we want to check if any of it adjacent spots have the next letter
+        
+        if the array entry is equal to the string index, we record that to a new array and check
+        each position adjacent 
+
+        checkForWordFunc(diagonal left up, string, i+1, strlen)
+        checkForWordFunc(up, string, i+1, strlen)
+        checkForWordFunc(diagonal right up, string, i+1, strlen)
+        checkForWordFunc(right, string, i+1, strlen)
+        checkForWordFunc(diagonal right down, string, i+1, strlen)
+        checkForWordFunc(down, string, i+1, strlen)
+        checkForWordFunc(diagonal left down, string, i+1, strlen)
+        checkForWordFunc(left, string, i+1, strlen)
 
 
+
+        
+
+    */
+
+
+
+
+    /*
+     
+        check word(array, word){
+            points in order[S][2]
+
+            for each letter in matrix(check if letter)
+                if letter, 
+                    points in order[i][2] = check word(array[diagonal left up], word)
+                    points in order[i][2] = check word(array[up], word)
+                    points in order[i][2] = check word(array[diagonal right up], word)
+                    points in order[i][2] = check word(array[right], word)
+                    points in order[i][2] = check word(array[diagonal right down], word)
+                    points in order[i][2] = check word(array[down], word)
+                    points in order[i][2] = check word(array[diagonal left down], word)
+                    points in order[i][2] = check word(array[left], word)
+                else 
+                    check word(array[next] word)
+        }
+
+
+
+
+
+
+
+
+
+     */
